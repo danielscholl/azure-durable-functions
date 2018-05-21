@@ -109,43 +109,152 @@ EOF1
 
 ### Create and test a Durable Function (Pattern #1 - Function Chaining)
 
+#### Create It
+
 ```bash
-# Create It
+func new -l C# -t "Durable Functions Activity" -n SayHello
 func new -l C# -t "Durable Functions HTTP starter" -n HttpTrigger
 func new -l C# -t "Durable Functions orchestrator" -n pattern1
-func new -l C# -t "Durable Functions Activity" -n SayHello
+```
 
-# Edit It
-# Modify pattern1/run.csx to call the proper Activity Function "SayHello"
 
-# Build It
-dotnet build
+#### Edit it
 
-# Start It
+Modify pattern1/run.csx to call the proper Activity Function "SayHello"
+
+```C#
+#r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
+
+public static async Task<List<string>> Run(DurableOrchestrationContext context)
+{
+    var outputs = new List<string>();
+
+    // Replace "hello" with the name of your Durable Activity Function.
+    outputs.Add(await context.CallActivityAsync<string>("SayHello", "Tokyo"));
+    outputs.Add(await context.CallActivityAsync<string>("SayHello", "Seattle"));
+    outputs.Add(await context.CallActivityAsync<string>("SayHello", "London"));
+
+    // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
+    return outputs;
+}
+```
+
+#### Test it
+
+```bash
 func start
-
-# Test It
 http post http://localhost:7071/api/orchestrators/pattern1
 ```
 
+
 ### Create and test a Durable Function (Pattern #2 - Fan-out/Fan-in)
 
+#### Create It
+`func new -l C# -t "Durable Functions Activity" -n ItemList`
+
+#### Edit it
+
+Modify ItemList/function.json
+
+```javascript
+{
+  "bindings": [
+    {
+      "name": "count",
+      "type": "activityTrigger",
+      "direction": "in"
+    }
+  ],
+  "disabled": false
+}
+```
+
+Modify ItemList/run.csx
+
+```c#
+#r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
+#r "Microsoft.Extensions.Logging"
+
+public static string[] Run(int count, ILogger log)
+{
+    string[] items = new string[count];
+    log.LogInformation($"Creating array {items.Length}.");
+    return items;
+}
+```
+
+#### Create It
+`func new -l C# -t "Durable Functions Activity" -n ItemAction`
+
+#### Edit it
+
+Modify ItemAction/function.json
+
+```javascript
+{
+  "bindings": [
+    {
+      "name": "item",
+      "type": "activityTrigger",
+      "direction": "in"
+    }
+  ],
+  "disabled": false
+}
+```
+
+Modify CopyFileToBlob/run.csx
+
+```c#
+#r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
+#r "Microsoft.Extensions.Logging"
+
+public static async Task<long> Run(string item, Binder binder, ILogger log)
+{
+    long byteCount = 10;
+    log.LogInformation($"**********  Received a Request for: '{item}'");
+
+    return byteCount;
+}
+```
+
+#### Create It
+`func new -l C# -t "Durable Functions orchestrator" -n pattern2`
+
+#### Edit it
+
+Modify pattern2/run.csx
+
+```c#
+#r "Microsoft.Azure.WebJobs.Extensions.DurableTask"
+
+public static async Task<long> Run(DurableOrchestrationContext context)
+{
+
+  string[] list = await context.CallActivityAsync<string[]>("ItemList", 3);
+
+  list[0] = "Item One";
+  list[1] = "Item Two";
+  list[2] = "Item Three";
+
+  var tasks = new Task<long>[list.Length];
+  for (int i = 0; i < list.Length; i++)
+  {
+      tasks[i] = context.CallActivityAsync<long>("ItemAction", list[i]);
+  }
+
+  await Task.WhenAll(tasks);
+
+  return list.Length;
+}
+```
+
+#### Test it
+
 ```bash
-# Create It
-func new -l C# -t "Durable Functions orchestrator" -n pattern2
-func new -l C# -t "Durable Functions Activity" -n SayHello
-
-# Edit It
-# Modify pattern1/run.csx to call the proper Activity Function "SayHello"
-
-# Build It
-dotnet build
-
-# Start It
 func start
+http post http://localhost:7071/api/orchestrators/pattern2
 
-# Test It
-http post http://localhost:7071/api/orchestrators/pattern1
 ```
 
 
