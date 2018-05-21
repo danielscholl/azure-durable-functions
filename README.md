@@ -22,14 +22,15 @@ git clone https://github.com/danielscholl/docker-swarm-azure.git durable-functio
 
 ```bash
 mkdir durable-functions
-func init
+cd durable-functions
+func init --worker-runtime dotnet
 ```
 
 ### Initialize a DotNet Library
 
 ```bash
 dotnet new lib --name durable-functions -o .
-rm Class.cs
+rm .\Class1.cs
 ```
 
 ### Add Library Dependencies
@@ -47,7 +48,7 @@ dotnet add package Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator -v
 
 ```bash
 # Create It
-func new -l javascript -t "Http Trigger" -n echo
+func new -l c# -t "Http Trigger" -n echo
 
 # Run It
 func start
@@ -87,7 +88,7 @@ export STORAGE_CONNECTION=$(az storage account show-connection-string --name ${S
 echo "export STORAGE_ACCOUNT='${STORAGE_CONNECTION}'" > .envrc
 
 # Create local.settings.json file
-cat > local2.settings.json << EOF1
+cat > local.settings.json << EOF1
 {
   "IsEncrypted": false,
   "Values": {
