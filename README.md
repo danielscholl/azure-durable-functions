@@ -59,6 +59,14 @@ http get http://localhost:7071/api/echo?name=world
 
 ### Create and Retrieve a Storage Account Connection String
 
+- Option 1:  Use Azure Storage Emulator
+
+```
+AzureStorageEmulator.exe start
+```
+
+- Option 2:  Use Azure Storage Account
+
 ```bash
 # Login to Azure and set subscription if necessary
 Subscription='<azure_subscription_name>'
@@ -103,12 +111,12 @@ EOF1
 
 ```bash
 # Create It
-func new -l C# -t "Durable Functions Activity" -n E1_SayHello
-func new -l C# -t "Durable Functions HTTP starter" -n E1_HttpTrigger
-func new -l C# -t "Durable Functions orchestrator" -n E1_Orchestrator
+func new -l C# -t "Durable Functions HTTP starter" -n HttpTrigger
+func new -l C# -t "Durable Functions orchestrator" -n pattern1
+func new -l C# -t "Durable Functions Activity" -n SayHello
 
 # Edit It
-# Modify E1_Orchestrator/run.csx to call the proper Activity Function "E1_SayHello"
+# Modify pattern1/run.csx to call the proper Activity Function "SayHello"
 
 # Build It
 dotnet build

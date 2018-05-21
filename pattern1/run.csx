@@ -9,9 +9,9 @@ public static async Task<List<string>> Run(DurableOrchestrationContext context)
     var outputs = new List<string>();
 
     // Replace "hello" with the name of your Durable Activity Function.
-    outputs.Add(await context.CallActivityAsync<string>("E1_SayHello", "Tokyo"));
-    outputs.Add(await context.CallActivityAsync<string>("E1_SayHello", "Seattle"));
-    outputs.Add(await context.CallActivityAsync<string>("E1_SayHello", "London"));
+    outputs.Add(await context.CallActivityAsync<string>("SayHello", "Tokyo"));
+    outputs.Add(await context.CallActivityAsync<string>("SayHello", "Seattle"));
+    outputs.Add(await context.CallActivityAsync<string>("SayHello", "London"));
 
     // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
     return outputs;
