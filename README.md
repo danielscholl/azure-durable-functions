@@ -125,8 +125,33 @@ dotnet build
 func start
 
 # Test It
-http post http://localhost:7071/api/orchestrators/E1_Orchestrator
+http post http://localhost:7071/api/orchestrators/pattern1
 ```
+
+### Create and test a Durable Function (Pattern #2 - Fan-out/Fan-in)
+
+```bash
+# Create It
+func new -l C# -t "Durable Functions orchestrator" -n pattern2
+func new -l C# -t "Durable Functions Activity" -n SayHello
+
+# Edit It
+# Modify pattern1/run.csx to call the proper Activity Function "SayHello"
+
+# Build It
+dotnet build
+
+# Start It
+func start
+
+# Test It
+http post http://localhost:7071/api/orchestrators/pattern1
+```
+
+
+
+
+
 
 ### Containerize and Test it
 
