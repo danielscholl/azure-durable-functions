@@ -103,9 +103,12 @@ EOF1
 
 ```bash
 # Create It
-func new -l C# -t "Durable Functions Activity" -n Hello
-func new -l C# -t "Durable Functions HTTP starter" -n httpstart
-func new -l C# -t "Durable Functions orchestrator" -n orchestrator
+func new -l C# -t "Durable Functions Activity" -n E1_SayHello
+func new -l C# -t "Durable Functions HTTP starter" -n E1_HttpTrigger
+func new -l C# -t "Durable Functions orchestrator" -n E1_Orchestrator
+
+# Edit It
+# Modify E1_Orchestrator/run.csx to call the proper Activity Function "E1_SayHello"
 
 # Build It
 dotnet build
@@ -114,7 +117,7 @@ dotnet build
 func start
 
 # Test It
-http post http://localhost:7071/api/orchestrators/orchestrator
+http post http://localhost:7071/api/orchestrators/E1_Orchestrator
 ```
 
 ### Containerize and Test it
